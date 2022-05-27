@@ -4,6 +4,8 @@
  */
 package pl.wit.gui;
 
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -18,6 +20,19 @@ public class MainForm extends javax.swing.JFrame {
     public MainForm() {
         initComponents();
         this.dataModel = (DefaultTableModel) studentsTable.getModel();
+      
+        //Listener do dynamicznego wyliczania sumy punktów
+        studentsTable.getModel().addTableModelListener(new TableModelListener() {
+            @Override
+            public void tableChanged(TableModelEvent tme) {
+                if (tme.getType() == TableModelEvent.UPDATE) {
+                   if (tme.getColumn()!=9) { 
+                         int currentRow = studentsTable.getSelectedRow();
+                         dataModel.setValueAt(pointsSum(currentRow), studentsTable.getSelectedRow() , 9);
+                   }
+                }
+            }
+        });       
     }
 
     /**
@@ -133,7 +148,7 @@ public class MainForm extends javax.swing.JFrame {
     private void addRowActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addRowActionPerformed
         dataModel.addRow(new Object[] {null, null, null, null, null, null, null, null, null, null});
     }//GEN-LAST:event_addRowActionPerformed
-
+    
     //zapisanie danych z tabeli
     private void saveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveButtonActionPerformed
         // TODO zapisywanie danych z tabeli to pliku
@@ -151,7 +166,19 @@ public class MainForm extends javax.swing.JFrame {
     private void uploadFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_uploadFileActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_uploadFileActionPerformed
-
+        
+    //zliczanie sumy punktów w edytowanym wierszu
+    private int pointsSum(int currentRow){
+        int sum=0;
+        for(int i=3; i<9;i++){
+            Integer value = (Integer) this.studentsTable.getValueAt(currentRow, i);
+            if(value != null){
+                sum+=value;
+            }
+        }
+        return sum;
+    }
+    
     /**
      * @param args the command line arguments
      */
