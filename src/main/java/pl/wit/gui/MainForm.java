@@ -4,6 +4,7 @@
  */
 package pl.wit.gui;
 
+import javax.swing.JOptionPane;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
@@ -28,11 +29,15 @@ public class MainForm extends javax.swing.JFrame {
                 if (tme.getType() == TableModelEvent.UPDATE) {
                    if (tme.getColumn()!=9) { 
                          int currentRow = studentsTable.getSelectedRow();
+                         if(validator(currentRow, tme.getColumn()) != true){
+                            JOptionPane.showMessageDialog(null, validationFailMessage(tme.getColumn()),"Błąd walidacji",JOptionPane.ERROR_MESSAGE);
+                         }
                          dataModel.setValueAt(pointsSum(currentRow), studentsTable.getSelectedRow() , 9);
-                   }
-                }
+                   }             
+                }    
             }
-        });       
+        }); 
+        
     }
 
     /**
@@ -146,7 +151,11 @@ public class MainForm extends javax.swing.JFrame {
 
     //dodanie wiersza w tabeli
     private void addRowActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addRowActionPerformed
-        dataModel.addRow(new Object[] {null, null, null, null, null, null, null, null, null, null});
+        if(this.studentsTable.getRowCount() == 0 || isAnyNull(this.studentsTable.getRowCount() - 1)){
+           dataModel.addRow(new Object[] {null, null, null, null, null, null, null, null, null, null}); 
+        }else{
+           JOptionPane.showMessageDialog(null, validationFailMessage(10),"Błąd walidacji",JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_addRowActionPerformed
     
     //zapisanie danych z tabeli
@@ -177,6 +186,127 @@ public class MainForm extends javax.swing.JFrame {
             }
         }
         return sum;
+    }
+    
+    //wyczyszczenie wartości w polu po wpisaniu nieprawidłowej wartości 
+    private void validationFail(int currentRow, int currentCell ){
+        dataModel.setValueAt(null, currentRow , currentCell);
+    }
+    //sprawdzenie czy którekolwiek z pól jest puste
+    private boolean isAnyNull(int currentRow){
+        boolean flag = true;
+        for(int i=0; i<9;i++){
+            if(this.studentsTable.getValueAt(currentRow, i) == null){
+                flag = false;
+                break;
+            }
+        }
+        return flag;
+    }
+    
+    //metoda zwracająca wartość komunikatu błędu
+    private String validationFailMessage(int currentCell){
+        String text;
+        switch(currentCell){
+            case(0):
+                text = "Proszę wpisać same cyfry.";
+                break;
+            case(1):
+                text = "Wartość w polu musi się składać z co najmniej dwóch wyrazów.";
+                break;
+            case(2):
+                text = "Proszę podać numer grupy.";
+                break;
+            case(3):
+                text = "Proszę podać wartość od 0 do 5.";
+                break;
+            case(4):
+                text = "Proszę podać wartość od 0 do 5.";
+                break;
+            case(5):
+                text = "Proszę podać wartość od 0 do 10.";
+                break;
+            case(6):
+                text = "Proszę podać wartość od 0 do 20.";
+                break;
+            case(7):
+                text = "Proszę podać wartość od 0 do 20.";
+                break;
+            case(8):
+                text = "Proszę podać wartość od 0 do 40.";
+                break;
+            case(10):
+                text = "Co najmniej jedno pole jest niewypełnione.\nWypełnij wszystkie pola przed dodaniem następnej pozycji.";
+                break;
+            case(11):
+                text = "Wypełnij wszystkie pola przed zapisem danych do pliku.";
+                break;
+            default:
+                text = "Błąd walidacji";
+                break;
+        }
+        return text;
+    }
+    
+    //metoda walidująca pola
+    private boolean validator(int currentRow, int currentCell){
+        Object value = this.studentsTable.getValueAt(currentRow, currentCell);      
+          if(value == null){
+            return true;
+          }   
+          switch(currentCell){
+            case(1):
+                String[] words = String.valueOf(value).split("\\s+");
+                if(words.length < 2 && value != null){
+                    validationFail(currentRow,currentCell);
+                    return false;
+                }
+                return true;
+            case(3):
+              if((Integer) value >= 0 && (Integer) value <= 5){
+                  return true;
+              }else{
+                validationFail(currentRow,currentCell); 
+                return false;
+              }
+            case(4):
+              if((Integer) value >= 0 && (Integer) value <= 5){
+                  return true;
+              }else{
+                validationFail(currentRow,currentCell); 
+                return false;
+              }
+            case(5):
+              if((Integer) value >= 0 && (Integer) value <= 10){
+                  return true;
+              }else{
+                validationFail(currentRow,currentCell); 
+                return false;
+              }
+            case(6):
+              if((Integer) value >= 0 && (Integer) value <= 20){
+                  return true;
+              }else{
+                validationFail(currentRow,currentCell); 
+                return false;
+              }
+            case(7):
+             if((Integer) value >= 0 && (Integer) value <= 20){
+                  return true;
+              }else{
+                validationFail(currentRow,currentCell); 
+                return false;
+              }
+             case(8):
+              if((Integer) value >= 0 && (Integer) value <= 40){
+                  return true;
+              }else{
+                validationFail(currentRow,currentCell); 
+                return false;
+              }
+            default:
+                return true;
+        } 
     }
     
     /**
