@@ -49,7 +49,7 @@ public class StudentService {
 		return studentRepository.findStudentByAlbum(album);
 	}
 
-	public void addStudent(Student student) {
+	public void addStudent(Student student) throws StudentAlreadyExistsException {
 		studentRepository.addStudent(student);
 	}
 }

@@ -15,13 +15,16 @@ class StudentRepository {
 		return this.students;
 	}
 
-	void addStudent(Student student) {
+	void addStudent(Student student) throws StudentAlreadyExistsException {
+		if (findStudentByAlbum(student.getAlbum()).isPresent()) {
+			throw new StudentAlreadyExistsException();
+		}
 		this.students.add(student);
 	}
 
 	void removeStudentByAlbum(int album) {
 		this.students.stream()
-				.filter(s -> s.getAlbum().equals(album))
+				.filter(student -> student.getAlbum().equals(album))
 				.findAny()
 				.ifPresent(students::remove);
 	}

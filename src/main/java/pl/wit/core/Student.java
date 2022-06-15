@@ -1,5 +1,7 @@
 package pl.wit.core;
 
+import java.util.Objects;
+
 /**
  * @author pawel.wesolowski
  */
@@ -96,5 +98,24 @@ public class Student {
 
 	public int getSum() {
 		return homeworkPoints + activityPoints + projectPoints + firstTestPoints + secondTestsPoints + examPoints;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		Student student = (Student) o;
+		return homeworkPoints == student.homeworkPoints && activityPoints == student.activityPoints && projectPoints == student.projectPoints
+				&& firstTestPoints == student.firstTestPoints && secondTestsPoints == student.secondTestsPoints && examPoints == student.examPoints
+				&& Objects.equals(album, student.album) && Objects.equals(name, student.name) && Objects.equals(group, student.group);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(album);
 	}
 }

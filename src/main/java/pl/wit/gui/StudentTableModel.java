@@ -125,7 +125,11 @@ class StudentTableModel extends DefaultTableModel {
 								},
 								() -> {
 									JOptionPane.showMessageDialog(null, "Student został dodany.", "", JOptionPane.INFORMATION_MESSAGE);
-									studentService.addStudent(studentFromRow);
+									try {
+										studentService.addStudent(studentFromRow);
+									} catch (Exception exception) {
+										JOptionPane.showMessageDialog(null, exception.getMessage(), "", JOptionPane.ERROR_MESSAGE);
+									}
 
 								}
 						);
