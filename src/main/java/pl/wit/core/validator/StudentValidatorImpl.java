@@ -7,7 +7,7 @@ public class StudentValidatorImpl implements StudentValidator {
 
 	@Override
 	public StudentFieldValidationResult validateAlbum(int album) {
-		if (album >= 0) {
+		if (album <= 0) {
 			return StudentFieldValidationResult.invalid("Numer albumu musi być większy od 0.");
 		}
 		return StudentFieldValidationResult.valid();
@@ -18,7 +18,7 @@ public class StudentValidatorImpl implements StudentValidator {
 		if (name == null || name.isBlank()) {
 			return StudentFieldValidationResult.invalid("Imię i nazwisko nie może być puste.");
 		}
-		return name.split("\\s+").length >= 2 ? StudentFieldValidationResult.valid() :
+		return name.trim().contains(" ") ? StudentFieldValidationResult.valid() :
 				StudentFieldValidationResult.invalid("Imię i naziwsko musi składać się z conajmniej dwóch członów.");
 	}
 

@@ -16,8 +16,6 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
 import javax.swing.table.DefaultTableModel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import pl.wit.core.StudentService;
 import static java.awt.EventQueue.invokeLater;
 
@@ -25,8 +23,6 @@ import static java.awt.EventQueue.invokeLater;
  * @author Piotr Bródka
  */
 public class MainForm extends JFrame {
-
-	private final Logger log = LoggerFactory.getLogger(MainForm.class);
 
 	private final JTable studentsTable;
 
@@ -45,7 +41,7 @@ public class MainForm extends JFrame {
 					break;
 				}
 		} catch (ClassNotFoundException | UnsupportedLookAndFeelException | IllegalAccessException | InstantiationException ex) {
-			LoggerFactory.getLogger(MainForm.class).error(null, ex);
+			System.err.println(ex.getMessage());
 		}
 		invokeLater(MainForm::new);
 	}
@@ -94,7 +90,6 @@ public class MainForm extends JFrame {
 								.addComponent(tablePane, GroupLayout.PREFERRED_SIZE, 318, GroupLayout.PREFERRED_SIZE)
 								.addContainerGap(30, Short.MAX_VALUE))
 		);
-
 		pack();
 	}
 
@@ -139,10 +134,7 @@ public class MainForm extends JFrame {
 			JFileChooser fileChooser = new JFileChooser();
 			if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
 				String absolutePath = fileChooser.getSelectedFile().getAbsolutePath();
-				log.debug("Selected file: " + absolutePath);
 				studentService.save(absolutePath);
-			} else {
-				log.debug("No file selected.");
 			}
 		} catch (IOException e) {
 			showError(e);
@@ -153,7 +145,9 @@ public class MainForm extends JFrame {
 		int selectedRow = studentsTable.getSelectedRow();
 		if (selectedRow != -1) {
 			Integer album = (Integer) studentsTable.getValueAt(selectedRow, 0);
-			studentService.removeStudentByAlbum(album);
+			if (album != null) {
+				studentService.removeStudentByAlbum(album);
+			}
 			((DefaultTableModel) studentsTable.getModel()).setRowCount(0);
 			studentsTable.setModel(getDataModel());
 		}
@@ -164,11 +158,8 @@ public class MainForm extends JFrame {
 			JFileChooser fileChooser = new JFileChooser();
 			if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
 				String absolutePath = fileChooser.getSelectedFile().getAbsolutePath();
-				log.debug("Selected file: " + absolutePath);
 				studentService.load(absolutePath);
 				studentsTable.setModel(getDataModel());
-			} else {
-				log.debug("No file selected.");
 			}
 		} catch (IOException e) {
 			showError(e);
