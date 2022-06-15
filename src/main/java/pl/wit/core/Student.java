@@ -23,6 +23,9 @@ public class Student {
 
 	private int examPoints;
 
+	public Student() {
+	}
+
 	public Student(String album,
 			String name,
 			String group,

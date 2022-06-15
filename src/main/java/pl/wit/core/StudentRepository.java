@@ -8,12 +8,16 @@ public class StudentRepository {
 	private final List<Student> students = new ArrayList<>();
 
 	public StudentRepository() {
-		students.add(new Student("123","Paweł Wesołowski","ABC",12,12,12,12,12,12));
-		students.add(new Student("123","Piotr Bródka","ABC",12,12,12,12,12,12));
+		students.add(new Student("123", "Paweł Wesołowski", "ABC", 12, 12, 12, 12, 12, 12));
+		students.add(new Student("123", "Piotr Bródka", "ABC", 12, 12, 12, 12, 12, 12));
 	}
 
 	public List<Student> getAllStudents() {
 		return students;
+	}
+
+	public void clear() {
+		students.clear();
 	}
 
 	public void addStudent(Student student) {
@@ -33,5 +37,10 @@ public class StudentRepository {
 				.filter(s -> s.getAlbum().equals(student.getAlbum()))
 				.findAny()
 				.ifPresent(s -> s.update(student));
+	}
+
+	public void load(List<Student> students) {
+		this.students.clear();
+		this.students.addAll(students);
 	}
 }

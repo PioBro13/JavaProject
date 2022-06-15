@@ -5,16 +5,24 @@
 package pl.wit.gui;
 
 import java.awt.event.ActionEvent;
+import java.io.IOException;
+import java.util.Objects;
 import javax.swing.GroupLayout;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.LayoutStyle;
+import javax.swing.WindowConstants;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.DefaultTableModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pl.wit.core.StudentRepository;
+import pl.wit.core.StudentService;
 import static java.awt.EventQueue.invokeLater;
 
 /**
@@ -22,60 +30,52 @@ import static java.awt.EventQueue.invokeLater;
  */
 public class MainForm extends JFrame {
 
+	private final Logger log = LoggerFactory.getLogger(MainForm.class);
+
 	private final DefaultTableModel dataModel;
 
-	private JTable studentsTable;
+	private final JTable studentsTable;
 
 	private final StudentRepository studentRepository = new StudentRepository();
 
-	/**
-	 * Creates new form MainForm
-	 */
-	public MainForm() {
-		initComponents();
-		this.dataModel = (DefaultTableModel) studentsTable.getModel();
+	private final StudentService studentService = new StudentService(studentRepository);
 
-		//Listener do dynamicznego wyliczania sumy punktów
-		studentsTable.getModel().addTableModelListener(tme -> {
-			if (tme.getType() == TableModelEvent.UPDATE) {
-				if (tme.getColumn() != 9) {
-					int currentRow = studentsTable.getSelectedRow();
-					if (!validator(currentRow, tme.getColumn())) {
-						JOptionPane.showMessageDialog(null, validationFailMessage(tme.getColumn()), "Błąd walidacji", JOptionPane.ERROR_MESSAGE);
-					}
-					dataModel.setValueAt(pointsSum(currentRow), studentsTable.getSelectedRow(), 9);
-				}
-			}
-		});
+	public MainForm() {
+		this.studentsTable = new JTable();
+		this.dataModel = (DefaultTableModel) studentsTable.getModel();
+		initComponents();
+
+//		//Listener do dynamicznego wyliczania sumy punktów
+//		studentsTable.getModel().addTableModelListener(tme -> {
+//			if (tme.getType() == TableModelEvent.UPDATE) {
+//				if (tme.getColumn() != 9) {
+//					int currentRow = studentsTable.getSelectedRow();
+//					//					if (!validator(currentRow, tme.getColumn())) {
+//					//						JOptionPane.showMessageDialog(null, validationFailMessage(tme.getColumn()), "Błąd walidacji", JOptionPane
+//					//						.ERROR_MESSAGE);
+//					//					}
+//					dataModel.setValueAt(pointsSum(currentRow), studentsTable.getSelectedRow(), 9);
+//				}
+//			}
+//		});
 
 	}
 
+	public static void main(String[] args) {
+		invokeLater(MainForm::new);
+	}
+
 	private void initComponents() {
-
-		JButton saveButton = new JButton();
-		JButton uploadFile = new JButton();
-		JScrollPane tablePane = new JScrollPane();
-		studentsTable = new JTable();
-		JButton addRow = new JButton();
-		JButton removeRow = new JButton();
-
-		setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		setTitle("Dane studentów");
-
-		saveButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/save.png"))); // NOI18N
-		saveButton.addActionListener(this::saveButtonActionPerformed);
-
-		uploadFile.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/upload.png"))); // NOI18N
-		uploadFile.addActionListener(this::uploadFileActionPerformed);
-
-		studentsTable.setModel(new StudentTableModel(studentRepository));
+		setVisible(true);
+		studentsTable.setModel(getDataModel());
+		JScrollPane tablePane = new JScrollPane();
 		tablePane.setViewportView(studentsTable);
-
-		addRow.setText("+");
-		addRow.addActionListener(this::addRowActionPerformed);
-
-		removeRow.setText("-");
-		removeRow.addActionListener(this::removeRowActionPerformed);
+		JButton saveButton = configureSaveButton();
+		JButton uploadFile = configureUploadFileButton();
+		JButton addRow = configureAddRowButton();
+		JButton removeRow = configureRemoveRowButton();
 
 		GroupLayout layout = new GroupLayout(getContentPane());
 		getContentPane().setLayout(layout);
@@ -114,30 +114,82 @@ public class MainForm extends JFrame {
 		pack();
 	}
 
-	//dodanie wiersza w tabeli
+	private StudentTableModel getDataModel() {
+		return new StudentTableModel(studentRepository);
+	}
+
+	private JButton configureSaveButton() {
+		JButton saveButton = new JButton();
+		saveButton.setIcon(new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/save.png"))));
+		saveButton.addActionListener(this::saveButtonActionPerformed);
+		return saveButton;
+	}
+
+	private JButton configureUploadFileButton() {
+		JButton uploadFile = new JButton();
+		uploadFile.setIcon(new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/upload.png"))));
+		uploadFile.addActionListener(this::uploadFileActionPerformed);
+		return uploadFile;
+	}
+
+	private JButton configureRemoveRowButton() {
+		JButton removeRow = new JButton();
+		removeRow.setText("-");
+		removeRow.addActionListener(this::removeRowActionPerformed);
+		return removeRow;
+	}
+
+	private JButton configureAddRowButton() {
+		JButton addRow = new JButton();
+		addRow.setText("+");
+		addRow.addActionListener(this::addRowActionPerformed);
+		return addRow;
+	}
+
 	private void addRowActionPerformed(ActionEvent evt) {
-		if (this.studentsTable.getRowCount() == 0 || isAnyNull(this.studentsTable.getRowCount() - 1)) {
-			dataModel.addRow(new Object[]{null, null, null, null, null, null, null, null, null, null});
-		} else {
-			JOptionPane.showMessageDialog(null, validationFailMessage(10), "Błąd walidacji", JOptionPane.ERROR_MESSAGE);
-		}
+		dataModel.addRow(new Object[]{null, null, null, null, null, null, null, null, null, null});
 	}
 
-	//zapisanie danych z tabeli
 	private void saveButtonActionPerformed(ActionEvent evt) {
-		// TODO zapisywanie danych z tabeli to pliku
-	}
-
-	//usunięcie wiersza z tabeli
-	private void removeRowActionPerformed(ActionEvent evt) {
 		try {
-			dataModel.removeRow(studentsTable.getSelectedRow());
-		} catch (Exception e) {
+			JFileChooser fileChooser = new JFileChooser();
+			if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+				String absolutePath = fileChooser.getSelectedFile().getAbsolutePath();
+				log.debug("Selected file: " + absolutePath);
+				studentService.save(absolutePath);
+			} else {
+				log.debug("No file selected.");
+			}
+		} catch (IOException e) {
+			showError(e);
 		}
 	}
 
-	//upload danych z pliku
+	private void showError(Exception exception) {
+		JOptionPane.showMessageDialog(this, exception.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+	}
+
+	private void removeRowActionPerformed(ActionEvent evt) {
+		String album = (String) studentsTable.getValueAt(studentsTable.getSelectedRow(), 0);
+		studentRepository.removeStudentByAlbum(album);
+		dataModel.setRowCount(0);
+		studentsTable.setModel(getDataModel());
+	}
+
 	private void uploadFileActionPerformed(ActionEvent evt) {
+		try {
+			JFileChooser fileChooser = new JFileChooser();
+			if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+				String absolutePath = fileChooser.getSelectedFile().getAbsolutePath();
+				log.debug("Selected file: " + absolutePath);
+				studentService.load(absolutePath);
+				studentsTable.setModel(getDataModel());
+			} else {
+				log.debug("No file selected.");
+			}
+		} catch (IOException e) {
+			showError(e);
+		}
 	}
 
 	//zliczanie sumy punktów w edytowanym wierszu
@@ -168,134 +220,4 @@ public class MainForm extends JFrame {
 		}
 		return flag;
 	}
-
-	//metoda zwracająca wartość komunikatu błędu
-	private String validationFailMessage(int currentCell) {
-		String text;
-		switch (currentCell) {
-			case (0):
-				text = "Proszę wpisać same cyfry.";
-				break;
-			case (1):
-				text = "Wartość w polu musi się składać z co najmniej dwóch wyrazów.";
-				break;
-			case (2):
-				text = "Proszę podać numer grupy.";
-				break;
-			case (3):
-				text = "Proszę podać wartość od 0 do 5.";
-				break;
-			case (4):
-				text = "Proszę podać wartość od 0 do 5.";
-				break;
-			case (5):
-				text = "Proszę podać wartość od 0 do 10.";
-				break;
-			case (6):
-				text = "Proszę podać wartość od 0 do 20.";
-				break;
-			case (7):
-				text = "Proszę podać wartość od 0 do 20.";
-				break;
-			case (8):
-				text = "Proszę podać wartość od 0 do 40.";
-				break;
-			case (10):
-				text = "Co najmniej jedno pole jest niewypełnione.\nWypełnij wszystkie pola przed dodaniem następnej pozycji.";
-				break;
-			case (11):
-				text = "Wypełnij wszystkie pola przed zapisem danych do pliku.";
-				break;
-			default:
-				text = "Błąd walidacji";
-				break;
-		}
-		return text;
-	}
-
-	//metoda walidująca pola
-	private boolean validator(int currentRow, int currentCell) {
-		Object value = this.studentsTable.getValueAt(currentRow, currentCell);
-		if (value == null) {
-			return true;
-		}
-		switch (currentCell) {
-			case (1):
-				String[] words = String.valueOf(value).split("\\s+");
-				if (words.length < 2) {
-					validationFail(currentRow, currentCell);
-					return false;
-				}
-				return true;
-			case (3):
-				if ((Integer) value >= 0 && (Integer) value <= 5) {
-					return true;
-				} else {
-					validationFail(currentRow, currentCell);
-					return false;
-				}
-			case (4):
-				if ((Integer) value >= 0 && (Integer) value <= 5) {
-					return true;
-				} else {
-					validationFail(currentRow, currentCell);
-					return false;
-				}
-			case (5):
-				if ((Integer) value >= 0 && (Integer) value <= 10) {
-					return true;
-				} else {
-					validationFail(currentRow, currentCell);
-					return false;
-				}
-			case (6):
-				if ((Integer) value >= 0 && (Integer) value <= 20) {
-					return true;
-				} else {
-					validationFail(currentRow, currentCell);
-					return false;
-				}
-			case (7):
-				if ((Integer) value >= 0 && (Integer) value <= 20) {
-					return true;
-				} else {
-					validationFail(currentRow, currentCell);
-					return false;
-				}
-			case (8):
-				if ((Integer) value >= 0 && (Integer) value <= 40) {
-					return true;
-				} else {
-					validationFail(currentRow, currentCell);
-					return false;
-				}
-			default:
-				return true;
-		}
-	}
-
-	/**
-	 * @param args the command line arguments
-	 */
-	public static void main(String args[]) {
-		//		/* Set the Nimbus look and feel */
-		//		//<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-		//		/* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-		//		 * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
-		//		 */
-		//		try {
-		//			for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels())
-		//				if ("Nimbus".equals(info.getName())) {
-		//					UIManager.setLookAndFeel(info.getClassName());
-		//					break;
-		//				}
-		//		} catch (ClassNotFoundException | UnsupportedLookAndFeelException | IllegalAccessException | InstantiationException ex) {
-		//			Logger.getLogger(MainForm.class.getName()).log(Level.SEVERE, null, ex);
-		//		}
-		//		//</editor-fold>
-
-		/* Create and display the form */
-		invokeLater(() -> new MainForm().setVisible(true));
-	}
-
 }
