@@ -5,7 +5,7 @@ package pl.wit.core;
  */
 public class Student {
 
-	private String album;
+	private Integer album;
 
 	private String name;
 
@@ -26,7 +26,7 @@ public class Student {
 	public Student() {
 	}
 
-	public Student(String album,
+	public Student(Integer album,
 			String name,
 			String group,
 			int homeworkPoints,
@@ -46,7 +46,7 @@ public class Student {
 		this.examPoints = examPoints;
 	}
 
-	public String getAlbum() {
+	public Integer getAlbum() {
 		return album;
 	}
 

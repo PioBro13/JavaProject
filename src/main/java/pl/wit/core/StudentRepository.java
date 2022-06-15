@@ -2,45 +2,38 @@ package pl.wit.core;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-public class StudentRepository {
+/**
+ * @author pawel.wesolowski
+ */
+class StudentRepository {
 
 	private final List<Student> students = new ArrayList<>();
 
-	public StudentRepository() {
-		students.add(new Student("123", "Paweł Wesołowski", "ABC", 12, 12, 12, 12, 12, 12));
-		students.add(new Student("123", "Piotr Bródka", "ABC", 12, 12, 12, 12, 12, 12));
+	List<Student> getAllStudents() {
+		return this.students;
 	}
 
-	public List<Student> getAllStudents() {
-		return students;
+	void addStudent(Student student) {
+		this.students.add(student);
 	}
 
-	public void clear() {
-		students.clear();
-	}
-
-	public void addStudent(Student student) {
-		students.add(student);
-	}
-
-	public void removeStudentByAlbum(String album) {
-		Student student = students.stream()
+	void removeStudentByAlbum(int album) {
+		this.students.stream()
 				.filter(s -> s.getAlbum().equals(album))
 				.findAny()
-				.orElse(null);
-		students.remove(student);
+				.ifPresent(students::remove);
 	}
 
-	public void updateStudent(Student student) {
-		students.stream()
-				.filter(s -> s.getAlbum().equals(student.getAlbum()))
-				.findAny()
-				.ifPresent(s -> s.update(student));
-	}
-
-	public void load(List<Student> students) {
+	void load(List<Student> students) {
 		this.students.clear();
 		this.students.addAll(students);
+	}
+
+	Optional<Student> findStudentByAlbum(int album) {
+		return this.students.stream()
+				.filter(s -> s.getAlbum().equals(album))
+				.findAny();
 	}
 }

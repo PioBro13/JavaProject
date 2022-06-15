@@ -1,42 +1,55 @@
 package pl.wit.core;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import pl.wit.core.validator.StudentValidator;
+import pl.wit.core.validator.StudentValidatorImpl;
 
+/**
+ * @author pawel.wesolowski
+ */
 public class StudentService {
 
 	private final StudentRepository studentRepository;
 
-	private final ObjectMapper objectMapper;
+	private final StudentValidator studentValidator;
 
-	public StudentService(StudentRepository studentRepository) {
-		this.studentRepository = studentRepository;
-		this.objectMapper = new ObjectMapper();
-		objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
-		objectMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+	private final StudentFileReaderWriter studentDataFileReaderWriter;
+
+	public StudentService() {
+		this.studentRepository = new StudentRepository();
+		this.studentValidator = new StudentValidatorImpl();
+		this.studentDataFileReaderWriter = new StudentFileReaderWriter();
 	}
 
 	public void save(String filename) throws IOException {
-		String json = objectMapper
-				.writerWithDefaultPrettyPrinter()
-				.writeValueAsString(studentRepository.getAllStudents());
-		try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
-			writer.write(json);
-			writer.flush();
-		}
+		List<Student> allStudents = studentRepository.getAllStudents();
+		studentDataFileReaderWriter.save(allStudents, filename);
 	}
 
 	public void load(String filename) throws IOException {
-		String json = new String(Files.readAllBytes(Paths.get(filename)));
-		List<Student> students = Arrays.asList(objectMapper.readValue(json, Student[].class));
+		List<Student> students = studentDataFileReaderWriter.load(filename);
 		studentRepository.load(students);
+	}
+
+	public List<Student> getAllStudents() {
+		return studentRepository.getAllStudents();
+	}
+
+	public void removeStudentByAlbum(int album) {
+		studentRepository.removeStudentByAlbum(album);
+	}
+
+	public StudentValidator getStudentValidator() {
+		return studentValidator;
+	}
+
+	public Optional<Student> findStudentByAlbum(int album) {
+		return studentRepository.findStudentByAlbum(album);
+	}
+
+	public void addStudent(Student student) {
+		studentRepository.addStudent(student);
 	}
 }

@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
 package pl.wit.gui;
 
 import java.awt.event.ActionEvent;
@@ -16,12 +12,12 @@ import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.LayoutStyle;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
-import javax.swing.event.TableModelEvent;
 import javax.swing.table.DefaultTableModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pl.wit.core.StudentRepository;
 import pl.wit.core.StudentService;
 import static java.awt.EventQueue.invokeLater;
 
@@ -32,36 +28,25 @@ public class MainForm extends JFrame {
 
 	private final Logger log = LoggerFactory.getLogger(MainForm.class);
 
-	private final DefaultTableModel dataModel;
-
 	private final JTable studentsTable;
 
-	private final StudentRepository studentRepository = new StudentRepository();
-
-	private final StudentService studentService = new StudentService(studentRepository);
+	private final StudentService studentService = new StudentService();
 
 	public MainForm() {
 		this.studentsTable = new JTable();
-		this.dataModel = (DefaultTableModel) studentsTable.getModel();
 		initComponents();
-
-//		//Listener do dynamicznego wyliczania sumy punktów
-//		studentsTable.getModel().addTableModelListener(tme -> {
-//			if (tme.getType() == TableModelEvent.UPDATE) {
-//				if (tme.getColumn() != 9) {
-//					int currentRow = studentsTable.getSelectedRow();
-//					//					if (!validator(currentRow, tme.getColumn())) {
-//					//						JOptionPane.showMessageDialog(null, validationFailMessage(tme.getColumn()), "Błąd walidacji", JOptionPane
-//					//						.ERROR_MESSAGE);
-//					//					}
-//					dataModel.setValueAt(pointsSum(currentRow), studentsTable.getSelectedRow(), 9);
-//				}
-//			}
-//		});
-
 	}
 
 	public static void main(String[] args) {
+		try {
+			for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels())
+				if ("Nimbus".equals(info.getName())) {
+					UIManager.setLookAndFeel(info.getClassName());
+					break;
+				}
+		} catch (ClassNotFoundException | UnsupportedLookAndFeelException | IllegalAccessException | InstantiationException ex) {
+			LoggerFactory.getLogger(MainForm.class).error(null, ex);
+		}
 		invokeLater(MainForm::new);
 	}
 
@@ -76,7 +61,6 @@ public class MainForm extends JFrame {
 		JButton uploadFile = configureUploadFileButton();
 		JButton addRow = configureAddRowButton();
 		JButton removeRow = configureRemoveRowButton();
-
 		GroupLayout layout = new GroupLayout(getContentPane());
 		getContentPane().setLayout(layout);
 		layout.setHorizontalGroup(
@@ -115,7 +99,7 @@ public class MainForm extends JFrame {
 	}
 
 	private StudentTableModel getDataModel() {
-		return new StudentTableModel(studentRepository);
+		return new StudentTableModel(studentService);
 	}
 
 	private JButton configureSaveButton() {
@@ -147,7 +131,7 @@ public class MainForm extends JFrame {
 	}
 
 	private void addRowActionPerformed(ActionEvent evt) {
-		dataModel.addRow(new Object[]{null, null, null, null, null, null, null, null, null, null});
+		((DefaultTableModel) studentsTable.getModel()).addRow(new Object[]{null, null, null, 0, 0, 0, 0, 0, 0, 0});
 	}
 
 	private void saveButtonActionPerformed(ActionEvent evt) {
@@ -165,15 +149,14 @@ public class MainForm extends JFrame {
 		}
 	}
 
-	private void showError(Exception exception) {
-		JOptionPane.showMessageDialog(this, exception.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-	}
-
 	private void removeRowActionPerformed(ActionEvent evt) {
-		String album = (String) studentsTable.getValueAt(studentsTable.getSelectedRow(), 0);
-		studentRepository.removeStudentByAlbum(album);
-		dataModel.setRowCount(0);
-		studentsTable.setModel(getDataModel());
+		int selectedRow = studentsTable.getSelectedRow();
+		if (selectedRow != -1) {
+			Integer album = (Integer) studentsTable.getValueAt(selectedRow, 0);
+			studentService.removeStudentByAlbum(album);
+			((DefaultTableModel) studentsTable.getModel()).setRowCount(0);
+			studentsTable.setModel(getDataModel());
+		}
 	}
 
 	private void uploadFileActionPerformed(ActionEvent evt) {
@@ -192,32 +175,8 @@ public class MainForm extends JFrame {
 		}
 	}
 
-	//zliczanie sumy punktów w edytowanym wierszu
-	private int pointsSum(int currentRow) {
-		int sum = 0;
-		for (int i = 3; i < 9; i++) {
-			Integer value = (Integer) this.studentsTable.getValueAt(currentRow, i);
-			if (value != null) {
-				sum += value;
-			}
-		}
-		return sum;
+	private void showError(Exception exception) {
+		JOptionPane.showMessageDialog(this, exception.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 	}
 
-	//wyczyszczenie wartości w polu po wpisaniu nieprawidłowej wartości
-	private void validationFail(int currentRow, int currentCell) {
-		dataModel.setValueAt(null, currentRow, currentCell);
-	}
-
-	//sprawdzenie czy którekolwiek z pól jest puste
-	private boolean isAnyNull(int currentRow) {
-		boolean flag = true;
-		for (int i = 0; i < 9; i++) {
-			if (this.studentsTable.getValueAt(currentRow, i) == null) {
-				flag = false;
-				break;
-			}
-		}
-		return flag;
-	}
 }
