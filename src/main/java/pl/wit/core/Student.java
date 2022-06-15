@@ -5,33 +5,33 @@ package pl.wit.core;
  */
 public class Student {
 
-	private final String album;
+	private String album;
 
-	private final String name;
+	private String name;
 
-	private final String group;
+	private String group;
 
-	private final byte homeworkPoints;
+	private int homeworkPoints;
 
-	private final byte activityPoints;
+	private int activityPoints;
 
-	private final byte projectPoints;
+	private int projectPoints;
 
-	private final byte firstTestPoints;
+	private int firstTestPoints;
 
-	private final byte secondTestsPoints;
+	private int secondTestsPoints;
 
-	private final byte examPoints;
+	private int examPoints;
 
 	public Student(String album,
 			String name,
 			String group,
-			byte homeworkPoints,
-			byte activityPoints,
-			byte projectPoints,
-			byte firstTestPoints,
-			byte secondTestsPoints,
-			byte examPoints) {
+			int homeworkPoints,
+			int activityPoints,
+			int projectPoints,
+			int firstTestPoints,
+			int secondTestsPoints,
+			int examPoints) {
 		this.album = album;
 		this.name = name;
 		this.group = group;
@@ -55,27 +55,43 @@ public class Student {
 		return group;
 	}
 
-	public byte getHomeworkPoints() {
+	public int getHomeworkPoints() {
 		return homeworkPoints;
 	}
 
-	public byte getActivityPoints() {
+	public int getActivityPoints() {
 		return activityPoints;
 	}
 
-	public byte getProjectPoints() {
+	public int getProjectPoints() {
 		return projectPoints;
 	}
 
-	public byte getFirstTestPoints() {
+	public int getFirstTestPoints() {
 		return firstTestPoints;
 	}
 
-	public byte getSecondTestsPoints() {
+	public int getSecondTestsPoints() {
 		return secondTestsPoints;
 	}
 
-	public byte getExamPoints() {
+	public int getExamPoints() {
 		return examPoints;
+	}
+
+	public void update(Student student) {
+		this.album = student.album;
+		this.name = student.name;
+		this.group = student.group;
+		this.homeworkPoints = student.homeworkPoints;
+		this.activityPoints = student.activityPoints;
+		this.projectPoints = student.projectPoints;
+		this.firstTestPoints = student.firstTestPoints;
+		this.secondTestsPoints = student.secondTestsPoints;
+		this.examPoints = student.examPoints;
+	}
+
+	public int getSum() {
+		return homeworkPoints + activityPoints + projectPoints + firstTestPoints + secondTestsPoints + examPoints;
 	}
 }
