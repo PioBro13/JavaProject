@@ -20,19 +20,33 @@ import pl.wit.core.StudentService;
 import static java.awt.EventQueue.invokeLater;
 
 /**
+ * Application's form
  * @author Piotr Bródka
  */
 public class MainForm extends JFrame {
 
+	/**
+	 * final JTable project
+	 */
 	private final JTable studentsTable;
 
+	/**
+	 * StudentService constructor
+	 */
 	private final StudentService studentService = new StudentService();
 
+	/**
+	 * Form initialization
+	 */
 	public MainForm() {
 		this.studentsTable = new JTable();
 		initComponents();
 	}
 
+	/**
+	 * Form's Main method
+	 * @param args args of Main method
+	 */
 	public static void main(String[] args) {
 		try {
 			for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels())
@@ -46,6 +60,9 @@ public class MainForm extends JFrame {
 		invokeLater(MainForm::new);
 	}
 
+	/**
+	 * Initialization of table's components
+	 */
 	private void initComponents() {
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		setTitle("Dane studentów");
@@ -93,10 +110,18 @@ public class MainForm extends JFrame {
 		pack();
 	}
 
+	/**
+	 *  Getter for table data model
+	 * @return data model of table
+	 */
 	private StudentTableModel getDataModel() {
 		return new StudentTableModel(studentService);
 	}
 
+	/**
+	 * Save button configuration
+	 * @return button configuration
+	 */
 	private JButton configureSaveButton() {
 		JButton saveButton = new JButton();
 		saveButton.setIcon(new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/save.png"))));
@@ -104,6 +129,10 @@ public class MainForm extends JFrame {
 		return saveButton;
 	}
 
+	/**
+	 * Load from file button configuration
+	 * @return button configuration
+	 */
 	private JButton configureUploadFileButton() {
 		JButton uploadFile = new JButton();
 		uploadFile.setIcon(new ImageIcon(Objects.requireNonNull(getClass().getResource("/icons/upload.png"))));
@@ -111,6 +140,10 @@ public class MainForm extends JFrame {
 		return uploadFile;
 	}
 
+	/**
+	 * Remove row button configuration
+	 * @return button configuration
+	 */
 	private JButton configureRemoveRowButton() {
 		JButton removeRow = new JButton();
 		removeRow.setText("-");
@@ -118,6 +151,10 @@ public class MainForm extends JFrame {
 		return removeRow;
 	}
 
+	/**
+	 *  Add row button configuration
+	 * @return button configuration
+	 */
 	private JButton configureAddRowButton() {
 		JButton addRow = new JButton();
 		addRow.setText("+");
@@ -125,10 +162,18 @@ public class MainForm extends JFrame {
 		return addRow;
 	}
 
+	/**
+	 * Method that adds row in rable
+	 * @param evt event when button is clicked
+	 */
 	private void addRowActionPerformed(ActionEvent evt) {
 		((DefaultTableModel) studentsTable.getModel()).addRow(new Object[]{null, null, null, 0, 0, 0, 0, 0, 0, 0});
 	}
 
+	/**
+	 * Saving data from table to file
+	 * @param evt event when button is clicked
+	 */
 	private void saveButtonActionPerformed(ActionEvent evt) {
 		try {
 			JFileChooser fileChooser = new JFileChooser();
@@ -141,6 +186,10 @@ public class MainForm extends JFrame {
 		}
 	}
 
+	/**
+	 * Method that removes row from table
+	 * @param evt event when button is clicked
+	 */
 	private void removeRowActionPerformed(ActionEvent evt) {
 		int selectedRow = studentsTable.getSelectedRow();
 		if (selectedRow != -1) {
@@ -153,6 +202,10 @@ public class MainForm extends JFrame {
 		}
 	}
 
+	/**
+	 * Uploading data from file to table
+	 * @param evt event when button is clicked
+	 */
 	private void uploadFileActionPerformed(ActionEvent evt) {
 		try {
 			JFileChooser fileChooser = new JFileChooser();
@@ -166,6 +219,10 @@ public class MainForm extends JFrame {
 		}
 	}
 
+	/**
+	 * Showing error message in dialog wbox
+	 * @param exception exception to be shown
+	 */
 	private void showError(Exception exception) {
 		JOptionPane.showMessageDialog(this, exception.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 	}

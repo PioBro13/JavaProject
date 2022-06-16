@@ -1,6 +1,7 @@
 package pl.wit.core.validator;
 
 /**
+ * Validator implementation
  * @author pawel.wesolowski
  */
 public class StudentValidatorImpl implements StudentValidator {
